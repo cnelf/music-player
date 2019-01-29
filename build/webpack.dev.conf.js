@@ -13,6 +13,13 @@ const portfinder = require('portfinder')
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
+const express = require('express')
+const axios = require('axios')
+
+const app = express()
+const apiRoutes = express.Router()
+app.use('/api', apiRoutes)
+
 const devWebpackConfig = merge(baseWebpackConfig, {
   module: {
     rules: utils.styleLoaders({ sourceMap: config.dev.cssSourceMap, usePostCSS: true })
@@ -42,6 +49,25 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
+    },
+    before(app) {
+      app.get('/api/getDicList', function (req, res) {
+        var url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'
+
+        axios.get(url, {
+          headers: {
+            // host: 'c.y.qq.com',
+            // referer: 'https://c.y.qq.com/'
+            // origin: 'https://y.qq.com',
+            referer: 'https://y.qq.com/portal/playlist.html'
+          },
+          params: req.query
+        }).then((response) => {
+          res.json(response.data)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
     }
   },
   plugins: [
