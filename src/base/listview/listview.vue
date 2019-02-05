@@ -33,14 +33,22 @@
         >{{item}}</li>
       </ul>
     </div>
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
+      <h2 class="fixed-title">{{fixedTitle}}</h2>
+    </div>
+    <div class="loading-container" v-show="!data.length">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script type="text/ecmascript-6">
 import Scroll from 'base/scroll/scroll'
 import {getData} from 'common/js/dom'
+import Loading from 'base/loading/loading'
 
 const ANCHOR_HEIGHT = 18
+const TITLE_HEIGHT = 30
 
 export default {
   data() {
@@ -48,7 +56,8 @@ export default {
       listenScroll: true,
       probeType: 3,
       scrollY: -1,
-      currentIndex: 0
+      currentIndex: 0,
+      diff: -1
     }
   },
   props: {
@@ -66,6 +75,12 @@ export default {
       return this.data.map((group) => {
         return group.title.substr(0, 1)
       })
+    },
+    fixedTitle() {
+      if (this.scrollY > 0) {
+        return ''
+      }
+      return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
     }
   },
   methods: {
@@ -119,16 +134,26 @@ export default {
         let height2 = heightGroup[i + 1]
         if (height2 && (-y >= height1 && -y < height2)) {
           this.currentIndex = i
+          this.diff = height2 + y
           return
         }
       }
+    },
+    diff(val) {
+      let fixedTop = (val > 0 && val < TITLE_HEIGHT) ? val - TITLE_HEIGHT + 1 : 0
+      if (this.fixedTop === fixedTop) {
+        return
+      }
+      this.fixedTop = fixedTop
+      this.$refs.fixed.style.transform = `translate3D(0, ${fixedTop}px, 0)`
     }
   },
   // updated () {
   //   console.log(this.shortcutList)
   // },
   components: {
-    Scroll
+    Scroll,
+    Loading
   }
 }
 </script>
@@ -182,4 +207,21 @@ export default {
         font-size: $font-size-small
         &.current
           color: $color-theme
+    .list-fixed
+      position: absolute
+      top: -1px
+      left: 0
+      width: 100%
+      .fixed-title
+        height: 30px
+        line-height: 30px
+        padding-left: 20px
+        font-size: $font-size-small
+        color: $color-text-l
+        background: $color-highlight-background
+    .loading-container
+      position: absolute
+      width: 100%
+      top: 50%
+      transform: translateY(-50%)
 </style>

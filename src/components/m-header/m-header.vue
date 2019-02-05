@@ -16,7 +16,7 @@ export default {
 
   .m-header
     position: relative
-    header: 44px
+    height: 44px
     text-align: center
     color: $color-theme
     font-size: 0
