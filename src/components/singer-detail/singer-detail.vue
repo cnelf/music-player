@@ -5,7 +5,17 @@
 </template>
 
 <script type="text/ecmascript-6">
+import {mapGetters} from 'vuex'
+
 export default {
+  created() {
+    console.log(this.singer)
+  },
+  computed: {
+    ...mapGetters([
+      'singer'
+    ])
+  }
 }
 </script>
 
