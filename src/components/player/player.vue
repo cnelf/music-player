@@ -15,7 +15,7 @@
         <div class="middle">
           <div class="middle-l">
             <div class="cd-wrapper" ref="cdWrapper">
-              <div class="cd">
+              <div class="cd" :class="cdRotate">
                 <img class="image" :src="currentSong.image" alt="">
               </div>
             </div>
@@ -30,7 +30,7 @@
               <i class="icon-prev"></i>
             </div>
             <div class="icon i-center">
-              <i class="icon-play"></i>
+              <i @click="togglePlay" :class="iconPlay"></i>
             </div>
             <div class="icon i-right">
               <i class="icon-next"></i>
@@ -45,18 +45,21 @@
     <transition name="mini">
       <div class="mini-player" v-show="!fullScreen" @click="open">
         <div class="icon">
-          <img width="40" height="40" :src="currentSong.image" alt="">
+          <img :class="cdRotate" width="40" height="40" :src="currentSong.image" alt="">
         </div>
         <div class="text">
           <h2 class="name" v-html="currentSong.name"></h2>
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
-        <div class="control"></div>
+        <div class="control">
+          <i @click.stop="togglePlay" class="icon-mini" :class="miniPlay"></i>
+        </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <audio ref="audio" :src="currentSong.url"></audio>
   </div>
 </template>
 
@@ -69,10 +72,20 @@ const transform = prefixStyle('transform')
 
 export default {
   computed: {
+    iconPlay() {
+      return this.playing ? 'icon-pause' : 'icon-play'
+    },
+    miniPlay() {
+      return this.playing ? 'icon-pause-mini' : 'icon-play-mini'
+    },
+    cdRotate() {
+      return this.playing ? 'play' : 'play pause'
+    },
     ...mapGetters([
       'playlist',
       'fullScreen',
-      'currentSong'
+      'currentSong',
+      'playing'
     ])
   },
   methods: {
@@ -119,6 +132,9 @@ export default {
       this.$refs.cdWrapper.style.transition = ''
       this.$refs.cdWrapper.style[transform] = ''
     },
+    togglePlay() {
+      this.setPlayingState(!this.playing)
+    },
     _getPosAndScale() {
       const targetWidth = 40
       const targetPaddingLeft = 20
@@ -137,12 +153,22 @@ export default {
       }
     },
     ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN'
+      setFullScreen: 'SET_FULL_SCREEN',
+      setPlayingState: 'SET_PLAYING_STATE'
     })
+  },
+  watch: {
+    currentSong() {
+      this.$nextTick(() => {
+        this.$refs.audio.play()
+      })
+    },
+    playing(state) {
+      this.$nextTick(() => {
+        state ? this.$refs.audio.play() : this.$refs.audio.pause()
+      })
+    }
   }
-  // updated() {
-  //   console.log(this.currentSong)
-  // }
 }
 </script>
 
@@ -232,8 +258,6 @@ export default {
                 width: 100%
                 height: 100%
                 border-radius: 50%
-                border: 10px solid hsla(0, 0%, 100%, .1)
-                box-sizing: border-box
       .bottom
         position: absolute
         bottom: 50px
@@ -347,9 +371,9 @@ export default {
           color: $color-theme-d
         .icon-mini
           font-size: 32px
-          position: absolute
-          left: 0
-          top: 0
+          // position: absolute
+          // left: 0
+          // top: 0
     .mini-enter-active, .mini-leave-active
       transition: all 0.4s
     .mini-enter, .mini-leave-to
