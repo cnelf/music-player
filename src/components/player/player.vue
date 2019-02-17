@@ -350,6 +350,10 @@ export default {
           position: absolute
           left: 0
           top: 0
+    .mini-enter-active, .mini-leave-active
+      transition: all 0.4s
+    .mini-enter, .mini-leave-to
+      opacity: 0
   @keyframes rotate
     0%
       transform: rotate(0)
