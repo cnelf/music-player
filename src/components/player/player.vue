@@ -22,6 +22,13 @@
           </div>
         </div>
         <div class="bottom">
+          <div class="progress-wrapper">
+            <span class="time time-l">{{formatTime(currentTime)}}</span>
+            <div class="progress-bar-wrapper">
+              <progress-bar :percent="progressPercent" @changePercent="changePercent"></progress-bar>
+            </div>
+            <span class="time time-r">{{formatTime(currentSong.duration)}}</span>
+          </div>
           <div class="operators">
             <div class="icon i-left">
               <i class="icon-sequence"></i>
@@ -52,14 +59,16 @@
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i @click.stop="togglePlay" class="icon-mini" :class="miniPlay"></i>
+          <progress-circle :percent="progressPercent">
+            <i @click.stop="togglePlay" class="icon-mini" :class="miniPlay"></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error"></audio>
+    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime"></audio>
   </div>
 </template>
 
@@ -67,13 +76,16 @@
 import {mapGetters, mapMutations} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from 'common/js/dom'
+import ProgressBar from 'base/progress-bar/progress-bar'
+import ProgressCircle from 'base/progress-circle/progress-circle'
 
 const transform = prefixStyle('transform')
 
 export default {
   data() {
     return {
-      songReady: false
+      songReady: false,
+      currentTime: 0
     }
   },
   computed: {
@@ -88,6 +100,9 @@ export default {
     },
     disableCls() {
       return this.songReady ? '' : 'disable'
+    },
+    progressPercent() {
+      return this.currentTime / this.currentSong.duration
     },
     ...mapGetters([
       'playlist',
@@ -151,9 +166,9 @@ export default {
       if (!this.songReady) {
         return
       }
-      let index = this.currentIndex + 1
-      if (index === this.playlist.length) {
-        index = 0
+      let index = this.currentIndex - 1
+      if (index === -1) {
+        index = this.playlist.length - 1
       }
       this.setCurrentIndex(index)
       if (!this.playing) {
@@ -165,9 +180,9 @@ export default {
       if (!this.songReady) {
         return
       }
-      let index = this.currentIndex - 1
-      if (index === -1) {
-        index = this.playlist.length - 1
+      let index = this.currentIndex + 1
+      if (index === this.playlist.length) {
+        index = 0
       }
       this.setCurrentIndex(index)
       if (!this.playing) {
@@ -180,6 +195,26 @@ export default {
     },
     error() {
       this.songReady = true
+    },
+    updateTime(e) {
+      this.currentTime = e.target.currentTime
+    },
+    formatTime(interval) {
+      let time = interval | 0
+      let minute = time / 60 | 0
+      let second = this._pad(time % 60)
+      return `${minute}:${second}`
+    },
+    changePercent(percent) {
+      this.$refs.audio.currentTime = this.currentSong.duration * percent
+    },
+    // 分钟位补0
+    _pad(second, n = 2) {
+      let len = second.toString().length
+      if (len < n) {
+        second = '0' + second
+      }
+      return second
     },
     _getPosAndScale() {
       const targetWidth = 40
@@ -215,6 +250,10 @@ export default {
         state ? this.$refs.audio.play() : this.$refs.audio.pause()
       })
     }
+  },
+  components: {
+    ProgressBar,
+    ProgressCircle
   }
 }
 </script>
@@ -420,9 +459,9 @@ export default {
           color: $color-theme-d
         .icon-mini
           font-size: 32px
-          // position: absolute
-          // left: 0
-          // top: 0
+          position: absolute
+          left: 0
+          top: 0
     .mini-enter-active, .mini-leave-active
       transition: all 0.4s
     .mini-enter, .mini-leave-to
