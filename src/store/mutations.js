@@ -11,10 +11,14 @@ const mutations = {
     state.fullScreen = flag
   },
   [types.SET_PLAYLIST](state, list) {
-    state.playlist = list
+    // list是引用类型的数组，有可能会在vuex之外的地方被修改，所以修改state时需要一个list的副本
+    state.playlist = Object.assign([], list)
+    // 方法二：state.playlist = JSON.parse(JSON.stringify(list))
+    // 报错：state.playlist = list
   },
   [types.SET_SEQUENCE_LIST](state, list) {
-    state.sequenceList = list
+    state.sequenceList = Object.assign([], list)
+    // state.sequenceList = list
   },
   [types.SET_CURRENT_INDEX](state, index) {
     state.currentIndex = index

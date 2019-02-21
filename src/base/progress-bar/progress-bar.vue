@@ -61,7 +61,12 @@ export default {
       this._triggerProgress()
     },
     progressClick(e) {
-      this._offsetWidth(e.offsetX - 5)
+      let pageX = e.pageX
+      let rect = this.$refs.progressBar.getBoundingClientRect()
+      let paddingLeft = rect.left
+      let offset = pageX - paddingLeft
+      // 使用e.offsetX会出现连续点击闪烁现象
+      this._offsetWidth(offset - 5)
       this._triggerProgress()
     },
     _triggerProgress() {
