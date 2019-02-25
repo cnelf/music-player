@@ -84,6 +84,9 @@ export default {
     }
   },
   methods: {
+    refresh() {
+      this.$refs.listview.refresh()
+    },
     onShortcutTouchStart(e) {
       // e.target返回点击的目标dom节点
       // console.log(e.target)

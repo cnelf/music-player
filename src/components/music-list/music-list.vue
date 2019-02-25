@@ -30,8 +30,8 @@ import Scroll from 'base/scroll/scroll'
 import SongList from 'base/song-list/song-list'
 import {prefixStyle} from 'common/js/dom'
 import Loading from 'base/loading/loading'
-
 import {mapActions} from 'vuex'
+import {playlistMixin} from 'common/js/mixin'
 
 const transfrom = prefixStyle('transform')
 const backdrop = prefixStyle('backdrop-filter')
@@ -39,6 +39,7 @@ const backdrop = prefixStyle('backdrop-filter')
 const RESERVE_HEIGHT = 40
 
 export default {
+  mixins: [playlistMixin],
   data() {
     return {
       scrollY: 0
@@ -67,6 +68,15 @@ export default {
     this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
   },
   methods: {
+    handlePlaylist(playlist) {
+      if (playlist.length > 0) {
+        this.$refs.list.$el.style.bottom = `60px`
+        this.$refs.list.refresh()
+      } else {
+        this.$refs.list.$el.style.bottom = ``
+        this.$refs.list.refresh()
+      }
+    },
     scroll(pos) {
       this.scrollY = pos.y
     },
