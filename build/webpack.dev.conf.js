@@ -67,6 +67,25 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         }).catch((e) => {
           console.log(e)
         })
+      }),
+      // nodejs中间层，处理前端请求还有后端响应
+      app.get('/api/getLyric', function (req, res) {
+        var url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+        axios.get(url, {
+          headers: {
+            // host: 'c.y.qq.com',
+            // referer: 'https://c.y.qq.com/'
+            // origin: 'https://y.qq.com',
+            origin: 'https://y.qq.com',
+            referer: 'https://y.qq.com/portal/player.html'
+          },
+          params: req.query
+        }).then((response) => {
+          // response是拿到后端的响应，res是处理自己的响应
+          res.json(response.data)
+        }).catch((e) => {
+          console.log(e)
+        })
       })
     }
   },
