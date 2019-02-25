@@ -25,6 +25,9 @@ const mutations = {
   },
   [types.SET_PLAY_MODE](state, mode) {
     state.playMode = mode
+  },
+  [types.SET_DISC](state, disc) {
+    state.disc = disc
   }
 }
 

@@ -436,7 +436,7 @@ export default {
       this.timer = setTimeout(() => {
         this.$refs.audio.play()
         this.getLyric()
-      }, 1000)
+      }, 100)
     },
     playing(state) {
       this.$nextTick(() => {
