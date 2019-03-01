@@ -25,6 +25,9 @@ export default {
     }
   },
   methods: {
+    setQuery(query) {
+      this.query = query
+    },
     clear() {
       this.query = ''
     }
@@ -48,6 +51,7 @@ export default {
       font-size: 24px
       color: $color-background
     .box
+      touch-action: none
       flex: 1
       margin: 0 5px
       line-height: 18px
