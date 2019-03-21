@@ -24,6 +24,14 @@ export default {
     listenScroll: {
       type: Boolean,
       default: false
+    },
+    pullUpRefresh: {
+      type: Boolean,
+      default: false
+    },
+    beforeScroll: {
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
@@ -44,6 +52,24 @@ export default {
         let me = this
         this.scroll.on('scroll', (pos) => {
           me.$emit('scroll', pos)
+        })
+      }
+
+      // 开启上拉刷新时，向外分发一个触底事件
+      if (this.pullUpRefresh) {
+        // let me = this
+        this.scroll.on('scrollEnd', () => {
+          // 距离底部还差50px时即认为触底
+          if (this.scroll.y <= (this.scroll.maxScrollY + 50)) {
+            this.$emit('scrollToBottom')
+          }
+        })
+      }
+
+      // 滚动时向外触发beforeScroll事件 用于控制input框的blur
+      if (this.beforeScroll) {
+        this.scroll.on('beforeScrollStart', () => {
+          this.$emit('scrolling')
         })
       }
     },

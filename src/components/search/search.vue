@@ -1,9 +1,9 @@
 <template>
   <div class="search">
     <div class="search-box-wrapper">
-      <search-box ref="searchBox"></search-box>
+      <search-box ref="searchBox" @query="newQuery"></search-box>
     </div>
-    <div class="shortcut-wrapper">
+    <div class="shortcut-wrapper" v-show="!query">
       <div class="shortcut">
         <div>
           <div class="hot-key">
@@ -17,6 +17,9 @@
         </div>
       </div>
     </div>
+    <div class="search-result" v-show="query">
+      <suggest @scrolling="blurInput" :query="query"></suggest>
+    </div>
   </div>
 </template>
 
@@ -24,23 +27,32 @@
 import SearchBox from 'base/search-box/search-box'
 import {getHotKey} from 'api/search'
 import {ERR_OK} from 'api/config'
+import Suggest from 'components/suggest/suggest'
 
 export default {
   data() {
     return {
-      hotKey: []
+      hotKey: [],
+      query: ''
     }
   },
   created() {
     this._getHotKey()
   },
   components: {
-    SearchBox
+    SearchBox,
+    Suggest
   },
   methods: {
     selectHotKey(k) {
       // this.$refs.searchBox.$data.query = k
-      this.$refs.serchBox.setQuery(k)
+      this.$refs.searchBox.setQuery(k)
+    },
+    newQuery(query) {
+      this.query = query
+    },
+    blurInput() {
+      this.$refs.searchBox.blur()
     },
     _getHotKey() {
       getHotKey().then((res) => {

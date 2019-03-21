@@ -102,6 +102,33 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           console.log(e)
         })
       })
+      // 获取搜索推荐数据(不允许跨域 伪造referer)
+      app.get('/api/getSuggest', function(req, res) {
+        const url = 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
+        axios.get(url, {
+          headers: {
+            Origin: 'https://m.y.qq.com',
+            Referer: 'https://m.y.qq.com/'
+          },
+          params: req.query
+        }).then((response) => {
+          var ret = response.data
+          // response是一个带有"callback()"的字符串
+          if (typeof ret === 'string') {
+            // 正则匹配失败 原因：字符串中含有()
+            // var reg = /^\w+\(({[^()]+})\)$/
+            // 截取callback()内的字符串
+            var reg = /^\w+\(({.+})\)$/
+            var matches = ret.match(reg)
+            if (matches) {
+              ret = JSON.parse(matches[1])
+            }
+          }
+          res.json(ret)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
     }
   },
   plugins: [

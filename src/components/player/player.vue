@@ -209,7 +209,9 @@ export default {
       if (!this.songReady) {
         return
       }
-      this.currentLyric.togglePlay()
+      if (this.currentLyric) {
+        this.currentLyric.togglePlay()
+      }
       this.setPlayingState(!this.playing)
     },
     prev() {

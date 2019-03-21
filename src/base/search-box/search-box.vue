@@ -1,17 +1,19 @@
 <template>
   <div class="search-box">
     <i class="icon-search"></i>
-    <input class="box" type="text" :placeholder="placeholder" v-model="query">
+    <input ref="query" class="box" type="text" :placeholder="placeholder" v-model="query">
     <i class="icon-dismiss" v-show="query" @click="clear"></i>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
+import {debounce} from 'common/js/util'
+
 export default {
   created() {
-    this.$watch('query', (newQuery) => {
+    this.$watch('query', debounce((newQuery) => {
       this.$emit('query', newQuery)
-    })
+    }, 500))
   },
   data() {
     return {
@@ -30,6 +32,10 @@ export default {
     },
     clear() {
       this.query = ''
+    },
+    // input框失去焦点 供外部调用
+    blur() {
+      this.$refs.query.blur()
     }
   }
 }

@@ -1,7 +1,7 @@
 <template>
   <div class="m-header">
     <div class="icon"></div>
-    <h1 class="text">Chicken Music</h1>
+    <h1 class="text">Music Player</h1>
   </div>
 </template>
 
@@ -27,7 +27,7 @@ export default {
       width: 30px
       height: 32px
       margin-right: 9px
-      bg-image('logo')
+      bg-image('logo2')
       background-size: 30px 32px
     .text
       display: inline-block
