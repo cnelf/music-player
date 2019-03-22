@@ -76,6 +76,7 @@ export default {
       } else {
         this.insertSong(item)
       }
+      this.$emit('selected')
     },
     getIconCls(item) {
       if (item.type === 'singer') {
@@ -125,6 +126,9 @@ export default {
     // 列表开始滚动
     scrolling() {
       this.$emit('scrolling')
+    },
+    refresh() {
+      this.$refs.suggest.refresh()
     },
     // 检查是否还有数据
     _checkMore(song) {
