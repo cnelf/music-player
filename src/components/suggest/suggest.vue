@@ -19,7 +19,6 @@
       </li>
       <loading v-show="hasMore" :title="title"></loading>
     </ul>
-    <router-view></router-view>
     <div v-show="!hasMore && !result.length" class="no-result-wrapper">
       <no-result title="很抱歉，没有找到匹配的歌曲"></no-result>
     </div>

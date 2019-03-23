@@ -87,30 +87,33 @@
             <i @click.stop="togglePlay" class="icon-mini" :class="miniPlay"></i>
           </progress-circle>
         </div>
-        <div class="control">
+        <div class="control" @click.stop="showPlaylist">
           <i class="icon-playlist"></i>
         </div>
       </div>
     </transition>
+    <playlist ref="playlist"></playlist>
     <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
-import {mapGetters, mapMutations} from 'vuex'
+import {mapGetters, mapMutations, mapActions} from 'vuex'
 import animations from 'create-keyframe-animation'
 import {prefixStyle} from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import {mode} from 'store/config'
-import {shuffle} from 'common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
+import Playlist from 'components/playlist/playlist'
+import {playerMixin} from 'common/js/mixin'
 
 const transform = prefixStyle('transform')
 const transition = prefixStyle('transition')
 
 export default {
+  mixins: [playerMixin],
   data() {
     return {
       songReady: false,
@@ -140,16 +143,6 @@ export default {
     },
     progressPercent() {
       return this.currentTime / this.currentSong.duration
-    },
-    iconMode() {
-      switch (this.playMode) {
-        case mode.sequence:
-          return 'icon-sequence'
-        case mode.loop:
-          return 'icon-loop'
-        case mode.random:
-          return 'icon-random'
-      }
     },
     ...mapGetters([
       'playlist',
@@ -266,6 +259,8 @@ export default {
     },
     ready() {
       this.songReady = true
+      // audio的canplay事件执行 意味着歌曲开始播放 将该歌曲插入到播放历史列表
+      this.savePlayHistory(this.currentSong)
     },
     error() {
       this.songReady = true
@@ -289,24 +284,6 @@ export default {
       if (this.currentLyric) {
         this.currentLyric.seek(changedTime * 1000)
       }
-    },
-    changeMode() {
-      let playMode = (this.playMode + 1) % 3
-      this.setPlayMode(playMode)
-      let list = null
-      if (playMode === mode.random) {
-        list = shuffle(this.sequenceList)
-      } else {
-        list = this.sequenceList
-      }
-      this.resetCurrentIndex(list)
-      this.setPlayList(list)
-    },
-    resetCurrentIndex(list) {
-      let index = list.findIndex((item) => {
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
     },
     getLyric() {
       this.currentSong.getLyric().then((lyric) => {
@@ -391,6 +368,10 @@ export default {
       this.$refs.middleL.style['opacity'] = opacity
       this.$refs.middleL.style[transition] = `all ${time}s`
     },
+    // playlist相关操作
+    showPlaylist() {
+      this.$refs.playlist.show()
+    },
     // 分钟位补0
     _pad(second, n = 2) {
       let len = second.toString().length
@@ -422,10 +403,17 @@ export default {
       setCurrentIndex: 'SET_CURRENT_INDEX',
       setPlayMode: 'SET_PLAY_MODE',
       setPlayList: 'SET_PLAYLIST'
-    })
+    }),
+    ...mapActions([
+      'savePlayHistory'
+    ])
   },
   watch: {
-    currentSong(oldSong, newSong) {
+    currentSong(newSong, oldSong) {
+      // 解决清空列表报错
+      if (!newSong.id) {
+        return
+      }
       if (oldSong.id === newSong.id) {
         return
       }
@@ -449,7 +437,8 @@ export default {
   components: {
     ProgressBar,
     ProgressCircle,
-    Scroll
+    Scroll,
+    Playlist
   }
 }
 </script>
