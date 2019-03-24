@@ -67,7 +67,7 @@
               <i class="icon-next" @click.stop.prevent="next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon icon-not-favorite"></i>
+              <i class="icon" :class="favoriteIconCls(currentSong)" @click="toggleFavorite(currentSong)"></i>
             </div>
           </div>
         </div>
@@ -93,7 +93,8 @@
       </div>
     </transition>
     <playlist ref="playlist"></playlist>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+    <!-- @canplay改成@paly 确保歌曲可以播放时再ready -->
+    <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
 
@@ -287,6 +288,10 @@ export default {
     },
     getLyric() {
       this.currentSong.getLyric().then((lyric) => {
+        // 防止切歌过快导致异步获取到的是上一首歌的歌词
+        if (this.currentSong.lyric !== lyric) {
+          return
+        }
         // Lyric是lyric-parser的构造类
         this.currentLyric = new Lyric(lyric, this.handleLyric)
         // console.log(this.currentLyric)
@@ -426,7 +431,7 @@ export default {
       this.timer = setTimeout(() => {
         this.$refs.audio.play()
         this.getLyric()
-      }, 100)
+      }, 1000)
     },
     playing(state) {
       this.$nextTick(() => {
